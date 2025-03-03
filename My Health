@@ -1,0 +1,156 @@
+import 'dart:async';
+import 'dart:math';
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(HeartbeatScannerApp());
+}
+
+class HeartbeatScannerApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: MembershipScreen(),
+    );
+  }
+}
+
+class MembershipScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text("Membership Required"),
+        backgroundColor: Colors.black,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Access requires a membership", style: TextStyle(fontSize: 22)),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ScanScreen()),
+                );
+              },
+              child: Text("Subscribe for \$20/month (₹600 in India)"),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                textStyle: TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ScanScreen extends StatefulWidget {
+  @override
+  _ScanScreenState createState() => _ScanScreenState();
+}
+
+class _ScanScreenState extends State<ScanScreen> {
+  bool isScanning = false;
+  String scanResult = "";
+
+  void startScan() {
+    setState(() {
+      isScanning = true;
+      scanResult = "";
+    });
+
+    Timer(Duration(seconds: 5), () {
+      setState(() {
+        isScanning = false;
+        scanResult = getRandomResult();
+      });
+    });
+  }
+
+  String getRandomResult() {
+    List<String> results = ["Danger", "Normal", "Good", "Excellent"];
+    return results[Random().nextInt(results.length)];
+  }
+
+  Color getResultColor() {
+    switch (scanResult) {
+      case "Danger":
+        return Colors.red;
+      case "Normal":
+        return Colors.yellow;
+      case "Good":
+        return Colors.green;
+      case "Excellent":
+        return Colors.blue;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text("Heartbeat & Breathing Scan"),
+        backgroundColor: Colors.black,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            isScanning
+                ? Column(
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 20),
+                      Text("Scanning...", style: TextStyle(fontSize: 18)),
+                    ],
+                  )
+                : scanResult.isNotEmpty
+                    ? Column(
+                        children: [
+                          Text("Result:", style: TextStyle(fontSize: 22)),
+                          SizedBox(height: 10),
+                          Container(
+                            padding: EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: getResultColor(),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              scanResult,
+                              style: TextStyle(fontSize: 24, color: Colors.white),
+                            ),
+                          ),
+                          if (scanResult == "Danger")
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text("⚠️ Consult a doctor immediately!",
+                                  style: TextStyle(fontSize: 18, color: Colors.red)),
+                            ),
+                        ],
+                      )
+                    : Text("Press 'Start Scan' to begin", style: TextStyle(fontSize: 18)),
+            SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: isScanning ? null : startScan,
+              child: Text("Start Scan"),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                textStyle: TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
